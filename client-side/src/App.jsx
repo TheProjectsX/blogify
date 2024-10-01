@@ -1,35 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// Components
+import UserDataContext from "./context/context";
+import NavbarComponent from "./components/Navbar";
+import FooterComponent from "./components/Footer";
+import { Outlet } from "react-router-dom";
+
+// React Toast
+import { ToastContainer, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+import { useEffect, useReducer, useState } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    const [dataLoading, setDataLoading] = useState(true);
+    const [userAuthData, setUserAuthData] = useState(null);
+
+    // Auth Change Effect
+    useEffect(() => {
+        fetch(`${import.meta.env.VITE_SERVER_URL}/me`, {
+            credentials: "include",
+        })
+            .then((res) => res.json())
+            .then((result) => {
+                if (result.success) {
+                    setUserAuthData(result);
+                }
+                setDataLoading(false);
+            });
+    }, []);
+
+    return (
+        <>
+            <ToastContainer
+                position="top-left"
+                autoClose={2500}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss={false}
+                draggable
+                pauseOnHover
+                theme="dark"
+                transition={Bounce}
+            />
+            <div className="max-width !p-0 font-ubuntu dark:bg-gray-800">
+                <UserDataContext.Provider
+                    value={{
+                        userAuthData,
+                        setUserAuthData,
+                        dataLoading,
+                        setDataLoading,
+                        forceUpdate,
+                    }}
+                >
+                    <NavbarComponent />
+                    <div className="space-y-8 dark:bg-gray-900 mb-4">
+                        <Outlet />
+                    </div>
+                    <FooterComponent />
+                </UserDataContext.Provider>
+            </div>
+        </>
+    );
 }
 
-export default App
+export default App;
