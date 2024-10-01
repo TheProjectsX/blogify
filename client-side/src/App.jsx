@@ -56,9 +56,9 @@ function App() {
                     }}
                 >
                     <NavbarComponent />
-                    <div className="space-y-8 dark:bg-gray-900 mb-4">
+                    <main className="space-y-8 dark:bg-gray-900 mb-4">
                         <Outlet />
-                    </div>
+                    </main>
                     <FooterComponent />
                 </UserDataContext.Provider>
             </div>

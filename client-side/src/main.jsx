@@ -9,6 +9,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 // import Register from "./routes/Register.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import Home from "./routes/Home.jsx";
+import Post from "./routes/Post.jsx";
 
 const router = createBrowserRouter([
     {
@@ -19,20 +20,23 @@ const router = createBrowserRouter([
             {
                 path: "/",
                 element: <Home />,
-                // loader: async () => [
-                //     await (
-                //         await fetch(
-                //             `${import.meta.env.VITE_SERVER_URL}/queries?limit=6`
-                //         )
-                //     ).json(),
-                //     await (
-                //         await fetch(
-                //             `${
-                //                 import.meta.env.VITE_SERVER_URL
-                //             }/tips-n-guides?limit=4`
-                //         )
-                //     ).json(),
-                // ],
+                loader: () => fetch(`${import.meta.env.VITE_SERVER_URL}/posts`),
+            },
+            {
+                path: "/post/:postId",
+                element: <Post />,
+                loader: async ({ params }) => [
+                    await (
+                        await fetch(
+                            `${import.meta.env.VITE_SERVER_URL}/posts/${
+                                params.postId
+                            }`
+                        )
+                    ).json(),
+                    await (
+                        await fetch(`${import.meta.env.VITE_SERVER_URL}/posts`)
+                    ).json(),
+                ],
             },
             // {
             //     path: "/login",
