@@ -85,7 +85,8 @@ app.post("/register", async (req, res) => {
         const dbResult = await db.collection("users").insertOne(doc);
         const result = { success: true, ...dbResult };
 
-        res.cookie("access_token", token, cookieOptions)
+        return res
+            .cookie("access_token", token, cookieOptions)
             .status(200)
             .json(result);
     } catch (error) {
@@ -160,6 +161,121 @@ app.get("/logout", async (req, res) => {
     res.clearCookie("access_token", cookieOptions)
         .status(200)
         .json({ success: true });
+});
+
+// Create new Post: Private Route
+app.post("/posts", async (req, res) => {
+    // const { email: tokenEmail } = req.user;
+    const tokenEmail = "rahatkhanfiction@gmail.com";
+
+    let { title, content, tags, imageUrl } = req.body;
+
+    if (!title || !content) {
+        return res
+            .status(400)
+            .json({ success: false, message: "Invalid Body Request" });
+    }
+
+    const doc = {
+        title,
+        content,
+        tags: tags || [],
+        imageUrl:
+            imageUrl || "https://i.ibb.co.com/ryNv8bc/image-placeholder.jpg",
+        authorEmail: tokenEmail,
+    };
+
+    try {
+        const dbResult = await db.collection("posts").insertOne(doc);
+        const result = { success: true, ...dbResult };
+
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
+// Get all posts: Public Route
+app.get("/posts", async (req, res) => {
+    let { limit = "10", page = "1" } = req.query;
+    limit = isNaN(Number(limit)) ? 10 : Number(limit);
+    page = isNaN(Number(page)) ? 1 : Number(page);
+
+    const skip = (page - 1) * limit;
+
+    try {
+        const dbResult = await db
+            .collection("posts")
+            .find()
+            .skip(skip)
+            .limit(limit)
+            .toArray();
+
+        const totalPostsCount = await db
+            .collection("posts")
+            .estimatedDocumentCount();
+
+        const pagination = {
+            currentCount: limit,
+            totalPosts: totalPostsCount,
+            has_next_page: page * limit < totalPostsCount,
+        };
+
+        const result = { success: true, pagination, data: dbResult };
+
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
+// Get single Post: Public Route
+app.get("/posts/:id", async (req, res) => {
+    const id = req.params.id;
+    let query;
+    try {
+        query = { _id: new ObjectId(id) };
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "Invalid Item id Provided",
+        });
+        return;
+    }
+
+    try {
+        const dbResult = await db.collection("posts").findOne(query);
+        if (!dbResult) {
+            return res
+                .status(404)
+                .json({ success: false, message: "Item not Found!" });
+        }
+
+        const result = { success: true, ...dbResult };
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
 });
 
 // Connecting to MongoDB first, then Starting the Server
