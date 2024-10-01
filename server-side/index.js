@@ -39,12 +39,60 @@ const cookieOptions = {
     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
 };
 
+// Check User Authentication: Middleware
+const checkUserAuthentication = (req, res, next) => {
+    const { access_token } = req.cookies;
+    if (!access_token) {
+        return res
+            .status(401)
+            .json({ success: false, message: "Authentication failed!" });
+    }
+
+    try {
+        const decrypted = jwt.verify(access_token, process.env.JWT_SECRET);
+        req.user = decrypted;
+    } catch (error) {
+        return res
+            .status(401)
+            .json({ success: false, message: "Authentication failed!" });
+    }
+
+    next();
+};
+
+// Check Admin Authentication: Middleware
+const checkAdminAuthentication = async (req, res, next) => {
+    const { access_token } = req.cookies;
+    if (!access_token) {
+        return res
+            .status(401)
+            .json({ success: false, message: "Authentication failed!" });
+    }
+
+    try {
+        const decrypted = jwt.verify(access_token, process.env.JWT_SECRET);
+        req.user = decrypted;
+        const query = { email: decrypted.email };
+        const dbResult = await db.collection("users").findOne(query);
+        if (dbResult.role !== "admin") {
+            return res
+                .status(403)
+                .json({ success: false, message: "Forbidden Request" });
+        }
+    } catch (error) {
+        return res
+            .status(401)
+            .json({ success: false, message: "Authentication failed!" });
+    }
+
+    next();
+};
+
 // Test Route
 app.get("/", async (req, res) => {
     res.json({ status: "success", message: "Server is Running!" });
 });
 
-// ROUTE: Users
 // Create new User: Public Route
 app.post("/register", async (req, res) => {
     let { username, email, password, profilePicture } = req.body;
@@ -151,7 +199,7 @@ app.post("/login", async (req, res) => {
 });
 
 // User Logout: Private Route
-app.get("/logout", async (req, res) => {
+app.get("/logout", checkUserAuthentication, async (req, res) => {
     const { access_token } = req.cookies;
     if (!access_token) {
         return res
@@ -165,9 +213,8 @@ app.get("/logout", async (req, res) => {
 });
 
 // Create new Post: Private Route
-app.post("/posts", async (req, res) => {
-    // const { email: tokenEmail } = req.user;
-    const tokenEmail = "rahatkhanfiction@gmail.com";
+app.post("/posts", checkUserAuthentication, async (req, res) => {
+    const { email: tokenEmail } = req.user;
 
     let { title, content, tags, imageUrl } = req.body;
 
@@ -285,9 +332,9 @@ app.get("/posts/:id", async (req, res) => {
 });
 
 // Update a Post: Private Route
-app.put("/posts/:id", async (req, res) => {
-    // const { email: tokenEmail } = req.user;
-    const tokenEmail = "rahatkhanfiction@gmail.com";
+app.put("/posts/:id", checkUserAuthentication, async (req, res) => {
+    const { email: tokenEmail } = req.user;
+
     let { title, content, imageUrl } = req.body;
     const id = req.params.id;
 
@@ -352,9 +399,9 @@ app.put("/posts/:id", async (req, res) => {
 });
 
 // Delete a Post: Private Route
-app.delete("/posts/:id", async (req, res) => {
-    // const { email: tokenEmail } = req.user;
-    const tokenEmail = "rahatkhanfiction@gmail.com";
+app.delete("/posts/:id", checkUserAuthentication, async (req, res) => {
+    const { email: tokenEmail } = req.user;
+
     const id = req.params.id;
     let query;
     try {
@@ -402,9 +449,8 @@ app.delete("/posts/:id", async (req, res) => {
 });
 
 // Get User Info: Private Route
-app.get("/me", async (req, res) => {
-    // const { email: tokenEmail } = req.user;
-    const tokenEmail = "rahatkhanfiction@gmail.com";
+app.get("/me", checkUserAuthentication, async (req, res) => {
+    const { email: tokenEmail } = req.user;
 
     try {
         const dbResult = await db
@@ -434,9 +480,8 @@ app.get("/me", async (req, res) => {
 });
 
 // Get posts by User: Private Route
-app.get("/me/posts", async (req, res) => {
-    // const { email: tokenEmail } = req.user;
-    const tokenEmail = "rahatkhanfiction@gmail.com";
+app.get("/me/posts", checkUserAuthentication, async (req, res) => {
+    const { email: tokenEmail } = req.user;
 
     try {
         const dbResult = await db
@@ -459,11 +504,14 @@ app.get("/me/posts", async (req, res) => {
 });
 
 // Get all Users: Admin Route
-app.get("/admin/users", async (req, res) => {
+app.get("/admin/users", checkAdminAuthentication, async (req, res) => {
     try {
         const dbResult = await db.collection("users").find().toArray();
+        const usersWithoutPassword = dbResult.map(
+            ({ password, ...rest }) => rest
+        );
 
-        const result = { success: true, data: dbResult };
+        const result = { success: true, data: usersWithoutPassword };
         return res.status(200).json(result);
     } catch (error) {
         console.error(error);
@@ -478,7 +526,7 @@ app.get("/admin/users", async (req, res) => {
 });
 
 // Delete one User: Admin Route
-app.delete("/admin/users/:id", async (req, res) => {
+app.delete("/admin/users/:id", checkAdminAuthentication, async (req, res) => {
     const id = req.params.id;
     let query;
     try {
@@ -521,60 +569,64 @@ app.delete("/admin/users/:id", async (req, res) => {
 });
 
 // Active or Inactive a user: Admin Route
-app.put("/admin/users/:id/:status", async (req, res) => {
-    const { id, status } = req.params;
+app.put(
+    "/admin/users/:id/:status",
+    checkAdminAuthentication,
+    async (req, res) => {
+        const { id, status } = req.params;
 
-    if (status !== "active" && status !== "inactive") {
-        return res.status(404).send();
-    }
-
-    let query;
-    try {
-        query = { _id: new ObjectId(id) };
-    } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: "Invalid User id Provided",
-        });
-        return;
-    }
-
-    const updateDoc = {
-        $set: {
-            status,
-        },
-    };
-
-    try {
-        const dbResult = await db
-            .collection("users")
-            .updateOne(query, updateDoc);
-
-        if (dbResult.modifiedCount > 0) {
-            return res.status(200).json({ success: true, ...dbResult });
-        } else {
-            if (dbResult.matchedCount > 0) {
-                return res.status(500).json({
-                    success: false,
-                    message: "Failed to Update User status",
-                });
-            } else {
-                return res
-                    .status(404)
-                    .json({ success: false, message: "User not Found" });
-            }
+        if (status !== "active" && status !== "inactive") {
+            return res.status(404).send();
         }
-    } catch (error) {
-        console.error(error);
 
-        const result = {
-            success: false,
-            message: "Server side error occurred",
+        let query;
+        try {
+            query = { _id: new ObjectId(id) };
+        } catch (error) {
+            res.status(400).json({
+                success: false,
+                message: "Invalid User id Provided",
+            });
+            return;
+        }
+
+        const updateDoc = {
+            $set: {
+                status,
+            },
         };
 
-        res.status(500).json(result);
+        try {
+            const dbResult = await db
+                .collection("users")
+                .updateOne(query, updateDoc);
+
+            if (dbResult.modifiedCount > 0) {
+                return res.status(200).json({ success: true, ...dbResult });
+            } else {
+                if (dbResult.matchedCount > 0) {
+                    return res.status(500).json({
+                        success: false,
+                        message: "Failed to Update User status",
+                    });
+                } else {
+                    return res
+                        .status(404)
+                        .json({ success: false, message: "User not Found" });
+                }
+            }
+        } catch (error) {
+            console.error(error);
+
+            const result = {
+                success: false,
+                message: "Server side error occurred",
+            };
+
+            res.status(500).json(result);
+        }
     }
-});
+);
 
 // Connecting to MongoDB first, then Starting the Server
 client
