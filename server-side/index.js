@@ -231,6 +231,7 @@ app.post("/posts", checkUserAuthentication, async (req, res) => {
         imageUrl:
             imageUrl || "https://i.ibb.co.com/ryNv8bc/image-placeholder.jpg",
         authorEmail: tokenEmail,
+        createdAt: new Date().toJSON(),
     };
 
     try {
