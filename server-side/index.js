@@ -278,6 +278,123 @@ app.get("/posts/:id", async (req, res) => {
     }
 });
 
+// Update a Post: Private Route
+app.put("/posts/:id", async (req, res) => {
+    // const { email: tokenEmail } = req.user;
+    const tokenEmail = "rahatkhanfiction@gmail.com";
+    let { title, content, imageUrl } = req.body;
+    const id = req.params.id;
+
+    let query;
+    try {
+        query = { _id: new ObjectId(id) };
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "Invalid Item id Provided",
+        });
+        return;
+    }
+
+    const oldItem = await db.collection("posts").findOne(query);
+
+    if (!oldItem) {
+        res.status(404).json({ success: false, message: "Item not Found" });
+        return;
+    }
+
+    if (oldItem.authorEmail !== tokenEmail) {
+        return res
+            .status(403)
+            .json({ success: false, message: "Forbidden Request" });
+    }
+
+    if (!title && !content) {
+        return res
+            .status(400)
+            .json({ success: false, message: "Invalid Body Request" });
+    }
+
+    const newDoc = {
+        title: title ?? oldItem.title,
+        content: content ?? oldItem.content,
+        imageUrl: imageUrl ?? oldItem.imageUrl,
+    };
+
+    try {
+        const dbResult = await db
+            .collection("posts")
+            .updateOne(query, { $set: newDoc });
+
+        if (dbResult.modifiedCount > 0) {
+            return res.status(200).json({ success: true, ...dbResult });
+        } else {
+            return res
+                .status(500)
+                .json({ success: false, message: "Nothing Updated" });
+        }
+    } catch (error) {
+        console.error(error);
+
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
+// Delete a Post: Private Route
+app.delete("/posts/:id", async (req, res) => {
+    // const { email: tokenEmail } = req.user;
+    const tokenEmail = "rahatkhanfiction@gmail.com";
+    const id = req.params.id;
+    let query;
+    try {
+        query = { _id: new ObjectId(id) };
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "Invalid Item id Provided",
+        });
+        return;
+    }
+
+    const oldItem = await db.collection("posts").findOne(query);
+    if (!oldItem) {
+        res.status(404).json({ success: false, message: "Item not Found" });
+        return;
+    }
+
+    if (oldItem.authorEmail !== tokenEmail) {
+        return res
+            .status(403)
+            .json({ success: false, message: "Forbidden Request" });
+    }
+
+    try {
+        const dbResult = await db.collection("posts").deleteOne(query);
+
+        if (dbResult.deletedCount > 0) {
+            return res.status(200).json({ success: true, ...dbResult });
+        } else {
+            return res
+                .status(500)
+                .json({ success: false, message: "Failed to Delete post" });
+        }
+    } catch (error) {
+        console.error(error);
+
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
 // Connecting to MongoDB first, then Starting the Server
 client
     .connect()
