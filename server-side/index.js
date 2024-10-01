@@ -111,14 +111,14 @@ app.post("/login", async (req, res) => {
     }
 
     try {
-        const userInfo = await db.collection("users").findOne({ email });
-        if (!userInfo) {
+        const dbResult = await db.collection("users").findOne({ email });
+        if (!dbResult) {
             return res
                 .status(401)
                 .json({ success: false, message: "Invalid Credentials" });
         }
 
-        const { password: serverPassword, ...userData } = userInfo;
+        const { password: serverPassword, ...userData } = dbResult;
         const passwordMatch = bcrypt.compareSync(
             String(password),
             serverPassword
@@ -264,7 +264,12 @@ app.get("/posts/:id", async (req, res) => {
                 .json({ success: false, message: "Item not Found!" });
         }
 
-        const result = { success: true, ...dbResult };
+        const postAuthor = await db
+            .collection("users")
+            .findOne({ email: dbResult.authorEmail });
+        const { password, ...authorData } = postAuthor;
+
+        const result = { success: true, ...dbResult, authorData };
         return res.status(200).json(result);
     } catch (error) {
         console.error(error);
@@ -383,6 +388,63 @@ app.delete("/posts/:id", async (req, res) => {
                 .status(500)
                 .json({ success: false, message: "Failed to Delete post" });
         }
+    } catch (error) {
+        console.error(error);
+
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
+// Get User Info: Private Route
+app.get("/me", async (req, res) => {
+    // const { email: tokenEmail } = req.user;
+    const tokenEmail = "rahatkhanfiction@gmail.com";
+
+    try {
+        const dbResult = await db
+            .collection("users")
+            .findOne({ email: tokenEmail });
+
+        if (!dbResult) {
+            return res
+                .status(404)
+                .json({ success: false, message: "User not Found!" });
+        }
+
+        const { password, ...userData } = dbResult;
+
+        const result = { success: true, ...userData };
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
+// Get posts by User: Private Route
+app.get("/me/posts", async (req, res) => {
+    // const { email: tokenEmail } = req.user;
+    const tokenEmail = "rahatkhanfiction@gmail.com";
+
+    try {
+        const dbResult = await db
+            .collection("posts")
+            .find({ authorEmail: tokenEmail })
+            .toArray();
+
+        const result = { success: true, data: dbResult };
+        return res.status(200).json(result);
     } catch (error) {
         console.error(error);
 
