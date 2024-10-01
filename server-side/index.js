@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
+import bcrypt from "bcrypt";
 import { MongoClient, ObjectId, ServerApiVersion } from "mongodb";
 
 dotenv.config();
@@ -38,11 +39,134 @@ const cookieOptions = {
     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
 };
 
+// Test Route
+app.get("/", async (req, res) => {
+    res.json({ status: "success", message: "Server is Running!" });
+});
+
+// ROUTE: Users
+// Create new User: Public Route
+app.post("/register", async (req, res) => {
+    let { username, email, password, profilePicture } = req.body;
+
+    if (!username || !email || !password) {
+        return res
+            .status(400)
+            .json({ success: false, message: "Invalid Body Request" });
+    }
+
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+        expiresIn: "24h",
+    });
+
+    const hashedPassword = bcrypt.hashSync(String(password), 10);
+
+    const doc = {
+        email,
+        username,
+        role: "user",
+        profilePicture:
+            profilePicture ||
+            "https://i.ibb.co.com/tQ1tBdV/dummy-profile-picture.jpg",
+        password: hashedPassword,
+        createdAt: new Date().toJSON(),
+    };
+
+    try {
+        const emailExists = await db
+            .collection("users")
+            .findOne({ email: email });
+        if (emailExists) {
+            return res
+                .status(201)
+                .json({ success: false, message: "User already exists!" });
+        }
+
+        const dbResult = await db.collection("users").insertOne(doc);
+        const result = { success: true, ...dbResult };
+
+        res.cookie("access_token", token, cookieOptions)
+            .status(200)
+            .json(result);
+    } catch (error) {
+        console.error(error);
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
+// User Login: Public Route
+app.post("/login", async (req, res) => {
+    let { email, password } = req.body;
+
+    if (!email || !password) {
+        return res
+            .status(400)
+            .json({ success: false, message: "Invalid Body Request" });
+    }
+
+    try {
+        const userInfo = await db.collection("users").findOne({ email });
+        if (!userInfo) {
+            return res
+                .status(401)
+                .json({ success: false, message: "Invalid Credentials" });
+        }
+
+        const { password: serverPassword, ...userData } = userInfo;
+        const passwordMatch = bcrypt.compareSync(
+            String(password),
+            serverPassword
+        );
+        if (!passwordMatch) {
+            return res
+                .status(401)
+                .json({ success: false, message: "Invalid Credentials" });
+        }
+
+        const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+            expiresIn: "24h",
+        });
+
+        const result = { success: true, ...userData };
+        return res
+            .cookie("access_token", token, cookieOptions)
+            .status(200)
+            .json(result);
+    } catch (error) {
+        console.error(error);
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
+// User Logout: Private Route
+app.get("/logout", async (req, res) => {
+    const { access_token } = req.cookies;
+    if (!access_token) {
+        return res
+            .status(401)
+            .json({ success: false, message: "Authentication failed!" });
+    }
+
+    res.clearCookie("access_token", cookieOptions)
+        .status(200)
+        .json({ success: true });
+});
+
 // Connecting to MongoDB first, then Starting the Server
 client
     .connect()
     .then(async () => {
-        db = client.db("alternative-seek");
+        db = client.db(process.env.DB_NAME);
         app.listen(port, () => {
             console.log(`Running in port ${port}`);
         });
