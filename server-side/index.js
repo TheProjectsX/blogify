@@ -65,6 +65,7 @@ app.post("/register", async (req, res) => {
         email,
         username,
         role: "user",
+        status: "active",
         profilePicture:
             profilePicture ||
             "https://i.ibb.co.com/tQ1tBdV/dummy-profile-picture.jpg",
@@ -445,6 +446,124 @@ app.get("/me/posts", async (req, res) => {
 
         const result = { success: true, data: dbResult };
         return res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
+// Get all Users: Admin Route
+app.get("/admin/users", async (req, res) => {
+    try {
+        const dbResult = await db.collection("users").find().toArray();
+
+        const result = { success: true, data: dbResult };
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
+// Delete one User: Admin Route
+app.delete("/admin/users/:id", async (req, res) => {
+    const id = req.params.id;
+    let query;
+    try {
+        query = { _id: new ObjectId(id) };
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "Invalid User id Provided",
+        });
+        return;
+    }
+
+    try {
+        const dbResult = await db.collection("users").deleteOne(query);
+
+        if (dbResult.deletedCount > 0) {
+            return res.status(200).json({ success: true, ...dbResult });
+        } else {
+            if (dbResult.matchedCount > 0) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Failed to Delete User",
+                });
+            } else {
+                return res
+                    .status(404)
+                    .json({ success: false, message: "User not Found" });
+            }
+        }
+    } catch (error) {
+        console.error(error);
+
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
+// Active or Inactive a user: Admin Route
+app.put("/admin/users/:id/:status", async (req, res) => {
+    const { id, status } = req.params;
+
+    if (status !== "active" && status !== "inactive") {
+        return res.status(404).send();
+    }
+
+    let query;
+    try {
+        query = { _id: new ObjectId(id) };
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: "Invalid User id Provided",
+        });
+        return;
+    }
+
+    const updateDoc = {
+        $set: {
+            status,
+        },
+    };
+
+    try {
+        const dbResult = await db
+            .collection("users")
+            .updateOne(query, updateDoc);
+
+        if (dbResult.modifiedCount > 0) {
+            return res.status(200).json({ success: true, ...dbResult });
+        } else {
+            if (dbResult.matchedCount > 0) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Failed to Update User status",
+                });
+            } else {
+                return res
+                    .status(404)
+                    .json({ success: false, message: "User not Found" });
+            }
+        }
     } catch (error) {
         console.error(error);
 
