@@ -36,8 +36,8 @@ const Dashboard = () => {
 
     return (
         <>
-            <section className="flex gap-8 justify-evenly items-center">
-                <div className="flex gap-8 justify-center items-center">
+            <section className="flex gap-8 justify-evenly items-center flex-col md:flex-row">
+                <div className="flex gap-8 justify-center items-center flex-col sm:flex-row">
                     {" "}
                     <div className="">
                         <img
@@ -46,7 +46,7 @@ const Dashboard = () => {
                             className="size-36 rounded-full"
                         />
                     </div>
-                    <div>
+                    <div className="text-center sm:text-left">
                         <h3 className="text-xl font-semibold font-lato dark:text-white">
                             {userAuthData.username}{" "}
                             <span className="text-base">
@@ -55,7 +55,7 @@ const Dashboard = () => {
                         </h3>
                         <p className="mb-5">{userAuthData.email}</p>
 
-                        <p>
+                        <p className="text-sm sm:text-base">
                             Created At:{" "}
                             {new Date(userAuthData.createdAt).toDateString()}
                         </p>
@@ -126,7 +126,12 @@ const Dashboard = () => {
                                                     to={`/post/${item._id}`}
                                                     className="hover:underline underline-offset-4"
                                                 >
-                                                    {item.title}
+                                                    {item.title.length > 34
+                                                        ? `${item.title.slice(
+                                                              0,
+                                                              34
+                                                          )}...`
+                                                        : item.title}
                                                 </Link>
                                             </th>
                                             <td className="px-6 py-4 min-w-40">

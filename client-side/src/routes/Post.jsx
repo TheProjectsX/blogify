@@ -33,10 +33,10 @@ const Post = () => {
                 </div>
 
                 <article
-                    className="mb-6 ql-editor !p-0"
+                    className="mb-6 ql-editor !p-0 text-sm sm:text-base"
                     dangerouslySetInnerHTML={{
                         __html: DOMPurify.sanitize(
-                            postData.content.replace("<p></p>", "<br/>")
+                            postData.content.replaceAll("<p></p>", "<br/>")
                         ),
                     }}
                 ></article>
@@ -54,7 +54,7 @@ const Post = () => {
             </section>
 
             {/* Popular Posts */}
-            <section className="md:w-96 min-w-80">
+            <section className="md:w-96 sm:min-w-80 flex-shrink-0">
                 <h4 className="text-xl md:text-2xl dark:text-white font-lato font-semibold mb-6 underline underline-offset-4 text-center">
                     Popular Posts
                 </h4>
@@ -71,7 +71,7 @@ const Post = () => {
                                 alt={item.title}
                                 className="w-16 h-12 rounded-sm"
                             />
-                            <h4 className="dark:text-white group-hover:underline underline-offset-2">
+                            <h4 className="dark:text-white group-hover:underline underline-offset-2 text-sm sm:text-base">
                                 {item.title}
                             </h4>
                         </Link>

@@ -28,7 +28,7 @@ const Home = () => {
 
     return (
         <>
-            <section className="flex flex-col md:flex-row gap-3 justify-between items-start">
+            <section className="flex flex-col md:flex-row gap-5 justify-between items-start">
                 {/* Latest Posts */}
                 <section className="flex-grow">
                     <h4 className="text-xl md:text-2xl dark:text-white font-lato font-semibold mb-6 underline underline-offset-4 text-center">
@@ -39,7 +39,7 @@ const Home = () => {
                         {homePageData.data.map((item, idx) => (
                             <article
                                 key={idx}
-                                className=" p-3 bg-gray-800 rounded-lg w-[300px]"
+                                className=" p-3 bg-gray-800 rounded-lg w-[290px] sm:w-[300px]"
                             >
                                 <img
                                     src={item.imageUrl}
@@ -49,7 +49,7 @@ const Home = () => {
                                 <div>
                                     <Link
                                         to={`/post/${item._id}`}
-                                        className="text-xl font-semibold dark:text-white hover:underline underline-offset-4 inline-block mb-1"
+                                        className="text-lg sm:text-xl font-semibold dark:text-white hover:underline underline-offset-4 inline-block mb-1"
                                     >
                                         {item.title}
                                     </Link>
@@ -94,7 +94,7 @@ const Home = () => {
                 </section>
 
                 {/* Popular Posts */}
-                <section className="md:w-96 min-w-80 flex-shrink-0">
+                <section className="md:w-96 sm:min-w-80 flex-shrink-0">
                     <h4 className="text-xl md:text-2xl dark:text-white font-lato font-semibold mb-6 underline underline-offset-4 text-center">
                         Popular Posts
                     </h4>
@@ -111,7 +111,7 @@ const Home = () => {
                                     alt={item.title}
                                     className="w-16 h-12 rounded-sm"
                                 />
-                                <h4 className="dark:text-white group-hover:underline underline-offset-2">
+                                <h4 className="dark:text-white group-hover:underline underline-offset-2 text-sm sm:text-base">
                                     {item.title}
                                 </h4>
                             </Link>
