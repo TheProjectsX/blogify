@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { useLoaderData } from "react-router-dom";
 import { TagsInput } from "react-tag-input-component";
 import { toast } from "react-toastify";
 
@@ -7,7 +7,7 @@ const EditPost = () => {
     const postDataPrimary = useLoaderData();
     const [postData, setPostData] = useState(postDataPrimary);
     const [tags, setTags] = useState(postData?.tags ?? []);
-    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
     const handleCreateNewPost = async (e) => {
         e.preventDefault();
@@ -21,6 +21,7 @@ const EditPost = () => {
         };
 
         let serverResponse;
+        setLoading(true);
         try {
             // If there is post data from before, it's editing!
             if (postData) {
@@ -67,6 +68,8 @@ const EditPost = () => {
             toast.error("Failed to Post!");
             console.error(error);
         }
+
+        setLoading(false);
     };
 
     return (
@@ -139,8 +142,18 @@ const EditPost = () => {
                     ></textarea>
                 </div>
 
-                <button className="btn btn-info w-full" type="submit">
-                    {postData ? "Update Post!" : "Publish Post"}
+                <button
+                    className="btn btn-info w-full"
+                    type="submit"
+                    disabled={loading}
+                >
+                    {loading ? (
+                        <div className="loading"></div>
+                    ) : postData ? (
+                        "Update Post!"
+                    ) : (
+                        "Publish Post"
+                    )}
                 </button>
             </form>
         </div>
