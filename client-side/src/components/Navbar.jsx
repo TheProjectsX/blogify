@@ -58,7 +58,7 @@ const NavbarComponent = () => {
                             </div>
                             <ul
                                 tabIndex={0}
-                                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-fit py-2 px-4 shadow"
+                                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-44 py-2 px-4 shadow"
                             >
                                 <li>
                                     <Link
@@ -68,6 +68,16 @@ const NavbarComponent = () => {
                                         Dashboard
                                     </Link>
                                 </li>
+                                {userAuthData.role === "admin" && (
+                                    <li>
+                                        <Link
+                                            to={"/admin/users"}
+                                            className="justify-between"
+                                        >
+                                            Users (admin)
+                                        </Link>
+                                    </li>
+                                )}
                                 <li>
                                     <button onClick={handleLogout}>
                                         Logout

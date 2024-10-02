@@ -35,7 +35,7 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="p-4">
+        <div className="p-4 min-h-[700px]">
             <section className="flex gap-8 justify-evenly items-center">
                 <div className="flex gap-8 justify-center items-center">
                     {" "}

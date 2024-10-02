@@ -13,6 +13,7 @@ import Post from "./routes/Post.jsx";
 import About from "./routes/About.jsx";
 import Dashboard from "./routes/Dashboard.jsx";
 import EditPost from "./routes/EditPost.jsx";
+import Users from "./routes/Users.jsx";
 
 const router = createBrowserRouter([
     {
@@ -94,6 +95,18 @@ const router = createBrowserRouter([
                             params.postId
                         }`
                     ),
+            },
+            {
+                path: "/admin/users",
+                element: (
+                    <PrivateRoute>
+                        <Users />
+                    </PrivateRoute>
+                ),
+                loader: () =>
+                    fetch(`${import.meta.env.VITE_SERVER_URL}/admin/users`, {
+                        credentials: "include",
+                    }),
             },
             // {
             //     path: "/update-profile",
