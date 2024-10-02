@@ -5,11 +5,12 @@ import "./index.css";
 
 // React Router Dom
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-// import Login from "./routes/Login.jsx";
-// import Register from "./routes/Register.jsx";
+import Login from "./routes/Login.jsx";
+import Register from "./routes/Register.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import Home from "./routes/Home.jsx";
 import Post from "./routes/Post.jsx";
+import About from "./routes/About.jsx";
 
 const router = createBrowserRouter([
     {
@@ -38,22 +39,26 @@ const router = createBrowserRouter([
                     ).json(),
                 ],
             },
-            // {
-            //     path: "/login",
-            //     element: (
-            //         <PrivateRoute reverse>
-            //             <Login />
-            //         </PrivateRoute>
-            //     ),
-            // },
-            // {
-            //     path: "/sign-up",
-            //     element: (
-            //         <PrivateRoute reverse>
-            //             <Register />
-            //         </PrivateRoute>
-            //     ),
-            // },
+            {
+                path: "/about",
+                element: <About />,
+            },
+            {
+                path: "/login",
+                element: (
+                    <PrivateRoute reverse>
+                        <Login />
+                    </PrivateRoute>
+                ),
+            },
+            {
+                path: "/register",
+                element: (
+                    <PrivateRoute reverse>
+                        <Register />
+                    </PrivateRoute>
+                ),
+            },
             // {
             //     path: "/update-profile",
             //     element: (

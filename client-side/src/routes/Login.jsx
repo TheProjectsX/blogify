@@ -8,14 +8,6 @@ import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 // React Toast
 import { toast } from "react-toastify";
 
-// Firebase Auth Provider
-import {
-    signInWithEmailAndPassword,
-    signInWithPopup,
-    GoogleAuthProvider,
-} from "firebase/auth";
-import auth from "../firebase/config";
-
 // React Helmet
 import { Helmet } from "react-helmet";
 import UserDataContext from "../context/context";
@@ -24,83 +16,51 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const context = useContext(UserDataContext);
-    const { setDataLoading } = context;
+    const { setDataLoading, setUserAuthData } = context;
 
-    // Login using Google
-    const handleGoogleLogin = () => {
-        const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider)
-            .then(async (userData) => {
-                setDataLoading(true);
-
-                const serverSignUp = await fetch(
-                    `${import.meta.env.VITE_SERVER_URL}/authentication`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "content-type": "application/json",
-                        },
-                        credentials: "include",
-                        body: JSON.stringify({ email: userData.user.email }),
-                    }
-                );
-                const data = await serverSignUp.json();
-                setDataLoading(false);
-                if (data.success) {
-                    toast.success("Login Successful!");
-                } else {
-                    toast.error("Error Logging in!");
-                }
-            })
-            .catch((error) => console.error(error));
-    };
-
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
 
-        setLoading(true);
         const email = e.target.email.value;
         const password = e.target.password.value;
 
-        signInWithEmailAndPassword(auth, email, password)
-            .then(async () => {
-                setDataLoading(true);
-                const serverSignUp = await fetch(
-                    `${import.meta.env.VITE_SERVER_URL}/authentication`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "content-type": "application/json",
-                        },
-                        credentials: "include",
-                        body: JSON.stringify({ email }),
-                    }
-                );
-                const data = await serverSignUp.json();
-                setDataLoading(false);
-                if (data.success) {
-                    toast.success("Login Successful!");
-                } else {
-                    toast.error("Error Logging in!");
-                    setLoading(false);
-                }
-            })
-            .catch((error) => {
-                if (error.code === "auth/invalid-credential") {
-                    toast.error("Incorrect Credentials!");
-                    setLoading(false);
-                } else if (error.code === "auth/too-many-requests") {
-                    toast.error("Too many Invalid Login attempts!");
-                    setLoading(false);
-                } else {
-                    toast.error("Error Ocurred in the Server");
-                    setLoading(false);
-                }
-            });
+        setLoading(true);
+        setDataLoading(true);
+
+        const loginBody = {
+            email,
+            password,
+        };
+
+        try {
+            const serverResponse = await (
+                await fetch(`${import.meta.env.VITE_SERVER_URL}/login`, {
+                    method: "POST",
+                    headers: {
+                        "content-type": "application/json",
+                    },
+                    credentials: "include",
+                    body: JSON.stringify(loginBody),
+                })
+            ).json();
+
+            if (serverResponse.success) {
+                toast.success("Login Successful!");
+                setUserAuthData(serverResponse);
+            } else {
+                toast.error(serverResponse.message);
+            }
+        } catch (error) {
+            toast.error("Failed to Login user!");
+            console.error(error);
+        }
+
+        setLoading(false);
+        setDataLoading(false);
     };
 
     return (
-        <section className=" dark:bg-gray-800">
+        <section className="min-h-[700px]">
             <Helmet>
                 <title>Login to Your Account | Crafted Gems</title>
             </Helmet>
@@ -113,22 +73,6 @@ const Login = () => {
                         <h1 className="text-xl font-bold leading-tight tracking-tight md:text-2xl dark:text-white text-center underline underline-offset-8">
                             Login to Your Account
                         </h1>
-                        <div className="flex flex-col sm:flex-row justify-center gap-3">
-                            <button
-                                className="px-6 py-2.5 flex justify-center items-center gap-2 border border-[#4b5563] rounded-lg hover:bg-gray-200 dark:hover:bg-[#374151] dark:text-white dark:hover:text-gray-200"
-                                onClick={handleGoogleLogin}
-                            >
-                                <FcGoogle className="text-xl" />
-                                Continue with Google
-                            </button>
-                        </div>
-                        <div className="relative flex items-center">
-                            <div className="flex-grow border-t border-gray-400"></div>
-                            <span className="flex-shrink mx-4 dark:text-gray-400">
-                                Or
-                            </span>
-                            <div className="flex-grow border-t border-gray-400"></div>
-                        </div>
                         <form
                             className="space-y-4 md:space-y-6"
                             onSubmit={handleLogin}
@@ -176,22 +120,7 @@ const Login = () => {
                                     </div>
                                 </label>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <div className="ml-3 text-sm">
-                                    <label className="dark:text-gray-300 items-center flex gap-2">
-                                        <input
-                                            aria-describedby="remember"
-                                            type="checkbox"
-                                            className="w-4 h-4 border rounded focus:ring-3 bg-gray-700 border-gray-600 focus:ring-[#2563eb] ring-offset-gray-800"
-                                            required=""
-                                        />
-                                        Remember me
-                                    </label>
-                                </div>
-                                <a className="text-sm font-medium hover:underline text-[#3b82f6] cursor-pointer">
-                                    Forgot password?
-                                </a>
-                            </div>
+
                             <button
                                 type="submit"
                                 name="submit"
@@ -205,10 +134,10 @@ const Login = () => {
                             <p className="text-sm font-light dark:text-gray-400">
                                 Don’t have an account yet?{" "}
                                 <Link
-                                    to="/sign-up"
-                                    className="font-medium hover:underline text-[#3b82f6] pl-4"
+                                    to="/register"
+                                    className="font-medium hover:underline underline-offset-4 text-[#3b82f6]"
                                 >
-                                    Sign up
+                                    Register
                                 </Link>
                             </p>
                         </form>
