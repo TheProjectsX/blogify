@@ -68,6 +68,14 @@ const NavbarComponent = () => {
                                         Dashboard
                                     </Link>
                                 </li>
+                                <li>
+                                    <Link
+                                        to={"/me/new"}
+                                        className="justify-between"
+                                    >
+                                        New Post
+                                    </Link>
+                                </li>
                                 {userAuthData.role === "admin" && (
                                     <li>
                                         <Link

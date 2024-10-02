@@ -2,12 +2,12 @@ import React from "react";
 
 const About = () => {
     return (
-        <article className="p-4 min-h-[700px]">
+        <>
             <h3 className="text-2xl font-semibold font-lato dark:text-white underline underline-offset-4 text-center mb-6">
                 About Us
             </h3>
 
-            <p>
+            <article>
                 Welcome to Blogify!
                 <br />
                 <br />
@@ -30,8 +30,8 @@ const About = () => {
                 <br />
                 Thank you for being a part of our journey. Together, we can make
                 Blogify a place for everyone to discover, learn, and connect.
-            </p>
-        </article>
+            </article>
+        </>
     );
 };
 

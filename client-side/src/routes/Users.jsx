@@ -68,7 +68,7 @@ const Users = () => {
     };
 
     return (
-        <div className="p-4 min-h-[700px]">
+        <>
             <h4 className="text-2xl font-semibold font-lato dark:text-white underline underline-offset-4 mb-5 text-center">
                 Registered Users:
             </h4>
@@ -167,7 +167,7 @@ const Users = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </>
     );
 };
 

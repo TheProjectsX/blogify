@@ -1,12 +1,33 @@
-import React from "react";
 import { Link, useLoaderData } from "react-router-dom";
+import DOMPurify from "dompurify";
+import { useState } from "react";
 
 const Home = () => {
-    const homePageData = useLoaderData();
-    const postsData = homePageData.data;
+    const homePageDataPrimary = useLoaderData();
+    const [homePageData, setHomePageData] = useState(homePageDataPrimary);
+    const [loading, setDataLoading] = useState(false);
+
+    const handleLoadMoreData = async () => {
+        const serverResponse = await (
+            await fetch(
+                `${import.meta.env.VITE_SERVER_URL}/posts?limit=6&page=${
+                    homePageData.pagination.nextPage
+                }`
+            )
+        ).json();
+
+        if (serverResponse.success) {
+            setHomePageData((prev) => ({
+                pagination: serverResponse.pagination,
+                data: [...prev.data, ...serverResponse.data],
+            }));
+        } else {
+            console.log("Something is Wrong!", serverResponse.message);
+        }
+    };
 
     return (
-        <div className="p-4">
+        <>
             <section className="flex flex-col md:flex-row gap-3 justify-between items-start">
                 {/* Latest Posts */}
                 <section className="flex-grow">
@@ -14,8 +35,8 @@ const Home = () => {
                         Latest Posts
                     </h4>
 
-                    <div className="flex gap-10 flex-wrap justify-evenly">
-                        {postsData.map((item, idx) => (
+                    <div className="flex gap-10 flex-wrap justify-evenly mb-8">
+                        {homePageData.data.map((item, idx) => (
                             <article
                                 key={idx}
                                 className=" p-3 bg-gray-800 rounded-lg w-[300px]"
@@ -37,15 +58,39 @@ const Home = () => {
                                             item.createdAt
                                         ).toDateString()}
                                     </p>
-                                    <p>
-                                        {item.content.length > 100
-                                            ? `${item.content.slice(0, 100)}...`
-                                            : item.content}
-                                    </p>
+                                    <p
+                                        className="ql-editor !p-0"
+                                        dangerouslySetInnerHTML={{
+                                            __html: DOMPurify.sanitize(
+                                                item.content.length > 100
+                                                    ? `${item.content.slice(
+                                                          0,
+                                                          100
+                                                      )}...`
+                                                    : item.content
+                                            ),
+                                        }}
+                                    ></p>
                                 </div>
                             </article>
                         ))}
                     </div>
+
+                    {homePageData.pagination.has_next_page && (
+                        <div className="flex justify-center">
+                            <button
+                                className="btn btn-neutral"
+                                onClick={handleLoadMoreData}
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <div className="loading"></div>
+                                ) : (
+                                    "Load More"
+                                )}
+                            </button>
+                        </div>
+                    )}
                 </section>
 
                 {/* Popular Posts */}
@@ -55,7 +100,7 @@ const Home = () => {
                     </h4>
 
                     <div className="bg-gray-800 p-4 space-y-3">
-                        {postsData.slice(0, 4).map((item, idx) => (
+                        {homePageData.data.slice(0, 4).map((item, idx) => (
                             <Link
                                 to={`/post/${item._id}`}
                                 key={idx}
@@ -74,7 +119,7 @@ const Home = () => {
                     </div>
                 </section>
             </section>
-        </div>
+        </>
     );
 };
 

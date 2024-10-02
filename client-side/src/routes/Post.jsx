@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useLoaderData } from "react-router-dom";
 import DOMPurify from "dompurify";
 
@@ -6,7 +5,7 @@ const Post = () => {
     const [postData, postsData] = useLoaderData();
 
     return (
-        <section className="flex flex-col md:flex-row gap-3 lg:gap-10 justify-between items-start p-4">
+        <section className="flex flex-col md:flex-row gap-3 lg:gap-10 justify-between items-start">
             {/* Latest Posts */}
             <section className="flex-grow ">
                 <div className="w-full flex justify-center">
@@ -36,7 +35,9 @@ const Post = () => {
                 <article
                     className="mb-6 ql-editor !p-0"
                     dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(postData.content),
+                        __html: DOMPurify.sanitize(
+                            postData.content.replace("<p></p>", "<br/>")
+                        ),
                     }}
                 ></article>
 

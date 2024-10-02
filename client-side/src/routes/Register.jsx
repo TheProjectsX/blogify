@@ -83,7 +83,7 @@ const Register = () => {
     };
 
     return (
-        <section className="">
+        <>
             <Helmet>
                 <title>Create new Account | Alternative Seek</title>
             </Helmet>
@@ -196,7 +196,7 @@ const Register = () => {
                     </div>
                 </div>
             </div>
-        </section>
+        </>
     );
 };
 

@@ -57,7 +57,7 @@ const Login = () => {
     };
 
     return (
-        <section className="min-h-[700px]">
+        <>
             <Helmet>
                 <title>Login to Your Account | Crafted Gems</title>
             </Helmet>
@@ -141,7 +141,7 @@ const Login = () => {
                     </div>
                 </div>
             </div>
-        </section>
+        </>
     );
 };
 

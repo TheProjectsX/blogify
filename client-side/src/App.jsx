@@ -56,7 +56,7 @@ function App() {
                     }}
                 >
                     <NavbarComponent />
-                    <main className="space-y-8 dark:bg-gray-900 mb-4">
+                    <main className="space-y-8 dark:bg-gray-900 mb-4 p-4 min-h-[700px]">
                         <Outlet />
                     </main>
                     <FooterComponent />

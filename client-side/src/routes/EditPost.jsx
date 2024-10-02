@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import { TagsInput } from "react-tag-input-component";
 import { toast } from "react-toastify";
@@ -53,8 +53,6 @@ const EditPost = () => {
                         body: JSON.stringify(body),
                     })
                 ).json();
-
-                setPostData(body);
             }
 
             if (serverResponse.success) {
@@ -63,6 +61,13 @@ const EditPost = () => {
                         ? "Post Updated Successfully!"
                         : "Posted Successfully!"
                 );
+                if (postData) {
+                    setPostData(body);
+                } else {
+                    form.reset();
+                    setTags([]);
+                    quill.clipboard.dangerouslyPasteHTML("");
+                }
             } else {
                 toast.error(serverResponse.message);
             }
@@ -74,13 +79,14 @@ const EditPost = () => {
         setLoading(false);
     };
 
-    const handleCreateNewPost2 = (e) => {
-        e.preventDefault();
-        console.log(quill.getSemanticHTML());
-    };
+    useEffect(() => {
+        if (quill && postData) {
+            quill.clipboard.dangerouslyPasteHTML(postData.content);
+        }
+    }, [quill]);
 
     return (
-        <div className="p-4">
+        <>
             <h4 className="text-2xl font-semibold font-lato dark:text-white underline underline-offset-4 mb-5 text-center">
                 {postData ? "Edit Post" : "Create new Post"}
             </h4>
@@ -169,7 +175,7 @@ const EditPost = () => {
                     )}
                 </button>
             </form>
-        </div>
+        </>
     );
 };
 
