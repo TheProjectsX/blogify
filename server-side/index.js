@@ -95,7 +95,7 @@ app.get("/", async (req, res) => {
 
 // Create new User: Public Route
 app.post("/register", async (req, res) => {
-    let { username, email, password, profilePicture } = req.body;
+    let { username, email, password, profilePicture = "" } = req.body;
 
     if (!username || !email || !password) {
         return res
@@ -115,8 +115,9 @@ app.post("/register", async (req, res) => {
         role: "user",
         status: "active",
         profilePicture:
-            profilePicture ||
-            "https://i.ibb.co.com/tQ1tBdV/dummy-profile-picture.jpg",
+            profilePicture === ""
+                ? "https://i.ibb.co.com/tQ1tBdV/dummy-profile-picture.jpg"
+                : profilePicture,
         password: hashedPassword,
         createdAt: new Date().toJSON(),
     };
@@ -218,7 +219,7 @@ app.get("/logout", checkUserAuthentication, async (req, res) => {
 app.post("/posts", checkUserAuthentication, async (req, res) => {
     const { email: tokenEmail } = req.user;
 
-    let { title, content, tags, imageUrl } = req.body;
+    let { title, content, tags, imageUrl = "" } = req.body;
 
     if (!title || !content) {
         return res
@@ -226,14 +227,18 @@ app.post("/posts", checkUserAuthentication, async (req, res) => {
             .json({ success: false, message: "Invalid Body Request" });
     }
 
+    const now = new Date().toJSON();
     const doc = {
         title,
         content,
         tags: tags || [],
         imageUrl:
-            imageUrl || "https://i.ibb.co.com/ryNv8bc/image-placeholder.jpg",
+            imageUrl === ""
+                ? "https://i.ibb.co.com/ryNv8bc/image-placeholder.jpg"
+                : imageUrl,
         authorEmail: tokenEmail,
-        createdAt: new Date().toJSON(),
+        createdAt: now,
+        updatedAt: now,
     };
 
     try {
@@ -266,6 +271,7 @@ app.get("/posts", async (req, res) => {
             .find()
             .skip(skip)
             .limit(limit)
+            .sort({ createdAt: -1 })
             .toArray();
 
         const totalPostsCount = await db
@@ -375,6 +381,7 @@ app.put("/posts/:id", checkUserAuthentication, async (req, res) => {
         title: title ?? oldItem.title,
         content: content ?? oldItem.content,
         imageUrl: imageUrl ?? oldItem.imageUrl,
+        updatedAt: new Date().toJSON(),
     };
 
     try {
@@ -490,6 +497,7 @@ app.get("/me/posts", checkUserAuthentication, async (req, res) => {
         const dbResult = await db
             .collection("posts")
             .find({ authorEmail: tokenEmail })
+            .sort({ updatedAt: -1 })
             .toArray();
 
         const result = { success: true, data: dbResult };
