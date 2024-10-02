@@ -506,6 +506,29 @@ app.get("/me/posts", checkUserAuthentication, async (req, res) => {
     }
 });
 
+// Get user statistics: Private Route
+app.get("/me/statistics", checkUserAuthentication, async (req, res) => {
+    const { email: tokenEmail } = req.user;
+
+    try {
+        const postCount = await db
+            .collection("posts")
+            .countDocuments({ authorEmail: tokenEmail });
+
+        const result = { success: true, postCount };
+        return res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+
+        const result = {
+            success: false,
+            message: "Server side error occurred",
+        };
+
+        res.status(500).json(result);
+    }
+});
+
 // Get all Users: Admin Route
 app.get("/admin/users", checkAdminAuthentication, async (req, res) => {
     try {
