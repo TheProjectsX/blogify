@@ -12,6 +12,7 @@ import Home from "./routes/Home.jsx";
 import Post from "./routes/Post.jsx";
 import About from "./routes/About.jsx";
 import Dashboard from "./routes/Dashboard.jsx";
+import EditPost from "./routes/EditPost.jsx";
 
 const router = createBrowserRouter([
     {
@@ -71,6 +72,28 @@ const router = createBrowserRouter([
                     fetch(`${import.meta.env.VITE_SERVER_URL}/me/posts`, {
                         credentials: "include",
                     }),
+            },
+            {
+                path: "/me/new",
+                element: (
+                    <PrivateRoute>
+                        <EditPost />
+                    </PrivateRoute>
+                ),
+            },
+            {
+                path: "/me/edit/:postId",
+                element: (
+                    <PrivateRoute>
+                        <EditPost />
+                    </PrivateRoute>
+                ),
+                loader: ({ params }) =>
+                    fetch(
+                        `${import.meta.env.VITE_SERVER_URL}/posts/${
+                            params.postId
+                        }`
+                    ),
             },
             // {
             //     path: "/update-profile",
