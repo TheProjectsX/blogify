@@ -15,6 +15,9 @@ import Dashboard from "./routes/Dashboard.jsx";
 import EditPost from "./routes/EditPost.jsx";
 import Users from "./routes/Users.jsx";
 
+// Quill Theme
+import "quill/dist/quill.snow.css";
+
 const router = createBrowserRouter([
     {
         path: "/",
@@ -99,7 +102,7 @@ const router = createBrowserRouter([
             {
                 path: "/admin/users",
                 element: (
-                    <PrivateRoute>
+                    <PrivateRoute admin>
                         <Users />
                     </PrivateRoute>
                 ),

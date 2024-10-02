@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import { TagsInput } from "react-tag-input-component";
 import { toast } from "react-toastify";
+import { useQuill } from "react-quilljs";
 
 const EditPost = () => {
+    const { quill, quillRef } = useQuill();
     const postDataPrimary = useLoaderData();
     const [postData, setPostData] = useState(postDataPrimary);
     const [tags, setTags] = useState(postData?.tags ?? []);
@@ -16,7 +18,7 @@ const EditPost = () => {
         const body = {
             title: form.title.value,
             imageUrl: form.imageUrl.value,
-            content: form.content.value,
+            content: quill.getSemanticHTML(),
             tags: tags,
         };
 
@@ -70,6 +72,11 @@ const EditPost = () => {
         }
 
         setLoading(false);
+    };
+
+    const handleCreateNewPost2 = (e) => {
+        e.preventDefault();
+        console.log(quill.getSemanticHTML());
     };
 
     return (
@@ -132,14 +139,20 @@ const EditPost = () => {
                     >
                         Blog Content <span className="text-red-600">*</span>
                     </label>
-                    <textarea
+                    {/* <textarea
                         id="content"
                         name="content"
                         className="block p-2.5 w-full h-96 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Write your Post here..."
                         defaultValue={postData?.content ?? ""}
                         required
-                    ></textarea>
+                    ></textarea> */}
+                    <div className="bg-white">
+                        <div
+                            ref={quillRef}
+                            className="!h-96 w-full dark:bg-gray-700 dark:text-white"
+                        />
+                    </div>
                 </div>
 
                 <button

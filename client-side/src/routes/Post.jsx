@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLoaderData } from "react-router-dom";
+import DOMPurify from "dompurify";
 
 const Post = () => {
     const [postData, postsData] = useLoaderData();
@@ -32,7 +33,12 @@ const Post = () => {
                     <p>{postData.authorData.username}</p>
                 </div>
 
-                <article className="mb-6">{postData.content}</article>
+                <article
+                    className="mb-6 ql-editor !p-0"
+                    dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(postData.content),
+                    }}
+                ></article>
 
                 <p className="flex gap-3 items-center">
                     <span className="italic">Tags:</span>{" "}

@@ -2,7 +2,7 @@ import { useContext } from "react";
 import UserDataContext from "../context/context";
 import { Navigate, useLocation } from "react-router-dom";
 
-const PrivateRoute = ({ children, reverse = false }) => {
+const PrivateRoute = ({ children, reverse = false, admin = false }) => {
     const context = useContext(UserDataContext);
     const { userAuthData, dataLoading } = context;
     const location = useLocation();
@@ -27,6 +27,19 @@ const PrivateRoute = ({ children, reverse = false }) => {
             </div>
         );
     }
+
+    if (!reverse && admin && userAuthData.role !== "admin") {
+        return (
+            <div className="flex justify-center p-5">
+                <div className="loading loading-lg"></div>
+                <Navigate
+                    to={location.state ? location.state : "/"}
+                    replace={true}
+                />
+            </div>
+        );
+    }
+
     if (userAuthData && reverse) {
         return (
             <div className="flex justify-center p-5">
