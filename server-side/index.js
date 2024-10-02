@@ -121,6 +121,8 @@ app.post("/register", async (req, res) => {
         createdAt: new Date().toJSON(),
     };
 
+    const { password: _, ...userInfo } = doc;
+
     try {
         const emailExists = await db
             .collection("users")
@@ -132,7 +134,7 @@ app.post("/register", async (req, res) => {
         }
 
         const dbResult = await db.collection("users").insertOne(doc);
-        const result = { success: true, ...dbResult };
+        const result = { success: true, ...userInfo };
 
         return res
             .cookie("access_token", token, cookieOptions)
