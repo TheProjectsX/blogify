@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import UserDataContext from "../context/context";
 
 // Icons
-import { FcGoogle } from "react-icons/fc";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 
 // React Toast
@@ -46,7 +45,6 @@ const Register = () => {
         const email = e.target.email.value;
         const photoUrl = e.target.photoUrl.value;
         setLoading(true);
-        setDataLoading(true);
 
         const registerBody = {
             email: email,
@@ -82,7 +80,6 @@ const Register = () => {
         }
 
         setLoading(false);
-        setDataLoading(false);
     };
 
     return (

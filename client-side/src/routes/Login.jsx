@@ -2,7 +2,6 @@ import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 
 // Icons
-import { FcGoogle } from "react-icons/fc";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 
 // React Toast
@@ -25,7 +24,6 @@ const Login = () => {
         const password = e.target.password.value;
 
         setLoading(true);
-        setDataLoading(true);
 
         const loginBody = {
             email,
@@ -56,7 +54,6 @@ const Login = () => {
         }
 
         setLoading(false);
-        setDataLoading(false);
     };
 
     return (

@@ -11,6 +11,7 @@ import PrivateRoute from "./components/PrivateRoute.jsx";
 import Home from "./routes/Home.jsx";
 import Post from "./routes/Post.jsx";
 import About from "./routes/About.jsx";
+import Dashboard from "./routes/Dashboard.jsx";
 
 const router = createBrowserRouter([
     {
@@ -58,6 +59,18 @@ const router = createBrowserRouter([
                         <Register />
                     </PrivateRoute>
                 ),
+            },
+            {
+                path: "/me",
+                element: (
+                    <PrivateRoute>
+                        <Dashboard />
+                    </PrivateRoute>
+                ),
+                loader: () =>
+                    fetch(`${import.meta.env.VITE_SERVER_URL}/me/posts`, {
+                        credentials: "include",
+                    }),
             },
             // {
             //     path: "/update-profile",
