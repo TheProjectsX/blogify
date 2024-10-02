@@ -282,6 +282,7 @@ app.get("/posts", async (req, res) => {
             currentCount: limit,
             totalPosts: totalPostsCount,
             has_next_page: page * limit < totalPostsCount,
+            nextPage: page + 1,
         };
 
         const result = { success: true, pagination, data: dbResult };
