@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import { TagsInput } from "react-tag-input-component";
 import { toast } from "react-toastify";
-import { useQuill } from "react-quilljs";
 
 const EditPost = () => {
-    const { quill, quillRef } = useQuill();
+    let quill;
     const postDataPrimary = useLoaderData();
     const [postData, setPostData] = useState(postDataPrimary);
     const [tags, setTags] = useState(postData?.tags ?? []);
     const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        quill = new Quill("#quill-editor", {
+            theme: "snow",
+        });
+        if (quill && postData) {
+            quill.clipboard.dangerouslyPasteHTML(postData.content);
+        }
+    }, []);
 
     const handleCreateNewPost = async (e) => {
         e.preventDefault();
@@ -68,6 +77,7 @@ const EditPost = () => {
                     setTags([]);
                     quill.clipboard.dangerouslyPasteHTML("");
                 }
+                navigate(`/post/${serverResponse.insertedId}`);
             } else {
                 toast.error(serverResponse.message);
             }
@@ -78,12 +88,6 @@ const EditPost = () => {
 
         setLoading(false);
     };
-
-    useEffect(() => {
-        if (quill && postData) {
-            quill.clipboard.dangerouslyPasteHTML(postData.content);
-        }
-    }, [quill]);
 
     return (
         <>
@@ -147,10 +151,21 @@ const EditPost = () => {
                     </label>
                     <div className="bg-white">
                         <div
+                            id="quill-editor"
+                            className="!h-96 w-full dark:bg-gray-700 dark:text-white"
+                        ></div>
+                    </div>
+                    {/* <div id="quill-editor">
+                        <p>Hello World!</p>
+  <p>Some initial <strong>bold</strong> text</p>
+  <p><br /></p>
+                    </div> */}
+                    {/* <div className="bg-white">
+                        <div
                             ref={quillRef}
                             className="!h-96 w-full dark:bg-gray-700 dark:text-white"
                         />
-                    </div>
+                    </div> */}
                 </div>
 
                 <button

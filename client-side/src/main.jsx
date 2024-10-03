@@ -16,7 +16,7 @@ import EditPost from "./routes/EditPost.jsx";
 import Users from "./routes/Users.jsx";
 
 // Quill Theme
-import "quill/dist/quill.snow.css";
+// import "react-quill/dist/quill.snow.css";
 
 const router = createBrowserRouter([
     {

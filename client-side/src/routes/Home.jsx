@@ -8,6 +8,7 @@ const Home = () => {
     const [loading, setDataLoading] = useState(false);
 
     const handleLoadMoreData = async () => {
+        setDataLoading(true);
         const serverResponse = await (
             await fetch(
                 `${import.meta.env.VITE_SERVER_URL}/posts?limit=6&page=${
@@ -24,6 +25,7 @@ const Home = () => {
         } else {
             console.log("Something is Wrong!", serverResponse.message);
         }
+        setDataLoading(false);
     };
 
     return (

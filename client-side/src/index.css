@@ -28,3 +28,68 @@
 .font-lato button {
     font-family: "Lato", sans-serif;
 }
+
+.reset-styles {
+    font: inherit !important;
+    color: inherit !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
+    text-decoration: none !important;
+}
+
+/* Specific resets for lists */
+.reset-styles ul,
+.reset-styles ol {
+    list-style: disc !important; /* Restore default list-style */
+}
+
+/* Specific reset for links */
+.reset-styles a {
+    color: blue !important; /* Restore default link color */
+    text-decoration: underline !important; /* Default link decoration */
+}
+
+/* Reset headings with explicit sizes */
+.reset-styles h1 {
+    font-size: 2em !important;
+    font-weight: bold !important;
+    margin: 0.67em 0 !important;
+}
+
+.reset-styles h2 {
+    font-size: 1.5em !important;
+    font-weight: bold !important;
+    margin: 0.75em 0 !important;
+}
+
+.reset-styles h3 {
+    font-size: 1.17em !important;
+    font-weight: bold !important;
+    margin: 0.83em 0 !important;
+}
+
+.reset-styles h4 {
+    font-size: 1em !important;
+    font-weight: bold !important;
+    margin: 1.12em 0 !important;
+}
+
+.reset-styles h5 {
+    font-size: 0.83em !important;
+    font-weight: bold !important;
+    margin: 1.5em 0 !important;
+}
+
+.reset-styles h6 {
+    font-size: 0.75em !important;
+    font-weight: bold !important;
+    margin: 1.67em 0 !important;
+}
+
+/* Reset paragraphs */
+.reset-styles p {
+    margin: 1em 0 !important;
+}
