@@ -33,7 +33,7 @@ const Post = () => {
                 </div>
 
                 <article
-                    className="mb-6 ql-editor !p-0 text-sm sm:text-base"
+                    className="mb-6 ql-editor !p-0 text-sm sm:text-base reset-styles"
                     dangerouslySetInnerHTML={{
                         __html: DOMPurify.sanitize(
                             postData.content.replaceAll("<p></p>", "<br/>")
