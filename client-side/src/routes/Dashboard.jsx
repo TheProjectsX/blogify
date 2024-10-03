@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import UserDataContext from "../context/context";
 import { Link, useLoaderData } from "react-router-dom";
 import Swal from "sweetalert2";
+import { toast } from "react-toastify";
 
 const Dashboard = () => {
     const context = useContext(UserDataContext);
